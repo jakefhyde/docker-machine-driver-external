@@ -39,31 +39,48 @@ func (d *driverWrapper) DriverName() string {
 
 type driverOptions struct {
 	drivers.DriverOptions
+	name string
 }
 
 func (d *driverOptions) String(key string) string {
-	return d.DriverOptions.String("external" + key)
+	if strings.HasPrefix(key, d.name) {
+		key = "external" + key
+	}
+	return d.DriverOptions.String(key)
 }
 
 func (d *driverOptions) StringSlice(key string) []string {
-	return d.DriverOptions.StringSlice("external" + key)
+	if strings.HasPrefix(key, d.name) {
+		key = "external" + key
+	}
+	return d.DriverOptions.StringSlice(key)
 }
 
 func (d *driverOptions) Int(key string) int {
-	return d.DriverOptions.Int("external" + key)
+	if strings.HasPrefix(key, d.name) {
+		key = "external" + key
+	}
+	return d.DriverOptions.Int(key)
 }
 
 func (d *driverOptions) Bool(key string) bool {
-	return d.DriverOptions.Bool("external" + key)
+	if strings.HasPrefix(key, d.name) {
+		key = "external" + key
+	}
+	return d.DriverOptions.Bool(key)
 }
 
 func (d *driverWrapper) SetConfigFromFlags(opts drivers.DriverOptions) error {
-	return d.Driver.SetConfigFromFlags(&driverOptions{opts})
+	return d.Driver.SetConfigFromFlags(&driverOptions{opts, d.Driver.DriverName()})
 }
 
 func (d *driverWrapper) GetCreateFlags() []mcnflag.Flag {
 	flags := d.Driver.GetCreateFlags()
 	for i, f := range flags {
+		// skip flags that are prefixed with the driver name, as they are just generic flags
+		if !strings.HasPrefix(f.String(), d.Driver.DriverName()) {
+			continue
+		}
 		switch f.(type) {
 		case *mcnflag.StringFlag:
 			f.(*mcnflag.StringFlag).Name = "external" + f.(*mcnflag.StringFlag).Name
