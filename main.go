@@ -84,15 +84,19 @@ func (d *driverWrapper) GetCreateFlags() []mcnflag.Flag {
 		if fl, ok := f.(mcnflag.StringFlag); ok {
 			fl.Name = "external" + fl.Name
 			fl.EnvVar = "EXTERNAL" + fl.EnvVar
+			f = fl
 		} else if fl, ok := f.(mcnflag.StringSliceFlag); ok {
 			fl.Name = "external" + fl.Name
 			fl.EnvVar = "EXTERNAL" + fl.EnvVar
+			f = fl
 		} else if fl, ok := f.(mcnflag.IntFlag); ok {
 			fl.Name = "external" + fl.Name
 			fl.EnvVar = "EXTERNAL" + fl.EnvVar
+			f = fl
 		} else if fl, ok := f.(mcnflag.BoolFlag); ok {
 			fl.Name = "external" + fl.Name
 			fl.EnvVar = "EXTERNAL" + fl.EnvVar
+			f = fl
 		} else {
 			panic("unknown flag type")
 		}

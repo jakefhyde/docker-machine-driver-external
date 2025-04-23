@@ -29,4 +29,5 @@ func TestGetCreateFlags(t *testing.T) {
 			assert.True(t, !strings.Contains(f.String(), "digitalocean"))
 		}
 	}
+	assert.True(t, len(flags) > 0)
 }
