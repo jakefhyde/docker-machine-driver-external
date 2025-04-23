@@ -1,0 +1,19 @@
+#!/bin/bash
+set -ex
+
+source $(dirname $0)/version
+
+cd $(dirname $0)/..
+
+if [ -z "${DRIVER_NAME}" ]; then
+  echo "DRIVER_NAME must be set"
+  exit 1
+fi
+
+mkdir -p dist/artifacts
+
+for arch in amd64 arm64; do
+  cp bin/docker-machine-driver-external-${DRIVER_NAME}-${arch} bin/docker-machine-driver-external-${DRIVER_NAME}
+  tar -zcvf dist/artifacts/docker-machine-driver-external-${DRIVER_NAME}-${arch}.tar.gz -C bin docker-machine-driver-external-${DRIVER_NAME}
+done
+rm bin/docker-machine-driver-external-${DRIVER_NAME}

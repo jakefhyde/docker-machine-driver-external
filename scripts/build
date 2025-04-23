@@ -1,0 +1,16 @@
+#!/bin/bash
+set -ex
+
+source $(dirname $0)/version
+
+cd $(dirname $0)/..
+
+if [ -z "${DRIVER_NAME}" ]; then
+  echo "DRIVER_NAME must be set"
+  exit 1
+fi
+
+mkdir -p bin
+[ "$(uname)" != "Darwin" ] && LINKFLAGS="-extldflags -static -s"
+GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.VERSION=$VERSION $LINKFLAGS" -o bin/docker-machine-driver-external-${DRIVER_NAME}-amd64
+GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "-X main.VERSION=$VERSION $LINKFLAGS" -o bin/docker-machine-driver-external-${DRIVER_NAME}-arm64

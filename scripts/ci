@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+cd $(dirname $0)
+
+for DRIVER_NAME in amazonec2 azure digitalocean vmwarevsphere
+do
+  export DRIVER_NAME="${DRIVER_NAME}"
+  ./build
+  ./package
+done
