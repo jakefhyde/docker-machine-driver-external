@@ -43,7 +43,7 @@ func main() {
 	}
 	s := strings.Split(filepath.Base(basename), "-")
 	name := s[len(s)-1]
-	if driver, ok := driverMap[name]; ok {
+	if driver, ok := driverMap[strings.TrimPrefix(name, "external")]; ok {
 		plugin.RegisterDriver(&driverWrapper{driver("machine", "")})
 	} else {
 		panic("no driver found for " + name + ".")
