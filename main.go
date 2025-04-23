@@ -33,7 +33,7 @@ type driverWrapper struct {
 }
 
 func (d *driverWrapper) DriverName() string {
-	return fmt.Sprintf("external-%s", d.Driver.DriverName())
+	return fmt.Sprintf("external%s", d.Driver.DriverName())
 }
 
 func main() {
