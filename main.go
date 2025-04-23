@@ -81,19 +81,20 @@ func (d *driverWrapper) GetCreateFlags() []mcnflag.Flag {
 		if !strings.HasPrefix(f.String(), d.Driver.DriverName()) {
 			continue
 		}
-		switch f.(type) {
-		case *mcnflag.StringFlag:
-			f.(*mcnflag.StringFlag).Name = "external" + f.(*mcnflag.StringFlag).Name
-			f.(*mcnflag.StringFlag).EnvVar = "EXTERNAL" + f.(*mcnflag.StringFlag).EnvVar
-		case *mcnflag.StringSliceFlag:
-			f.(*mcnflag.StringSliceFlag).Name = "external" + f.(*mcnflag.StringSliceFlag).Name
-			f.(*mcnflag.StringSliceFlag).EnvVar = "EXTERNAL" + f.(*mcnflag.StringSliceFlag).EnvVar
-		case *mcnflag.IntFlag:
-			f.(*mcnflag.IntFlag).Name = "external" + f.(*mcnflag.IntFlag).Name
-			f.(*mcnflag.IntFlag).EnvVar = "EXTERNAL" + f.(*mcnflag.IntFlag).EnvVar
-		case *mcnflag.BoolFlag:
-			f.(*mcnflag.BoolFlag).Name = "external" + f.(*mcnflag.BoolFlag).Name
-			f.(*mcnflag.BoolFlag).EnvVar = "EXTERNAL" + f.(*mcnflag.BoolFlag).EnvVar
+		if fl, ok := f.(mcnflag.StringFlag); ok {
+			fl.Name = "external" + fl.Name
+			fl.EnvVar = "EXTERNAL" + fl.EnvVar
+		} else if fl, ok := f.(mcnflag.StringSliceFlag); ok {
+			fl.Name = "external" + fl.Name
+			fl.EnvVar = "EXTERNAL" + fl.EnvVar
+		} else if fl, ok := f.(mcnflag.IntFlag); ok {
+			fl.Name = "external" + fl.Name
+			fl.EnvVar = "EXTERNAL" + fl.EnvVar
+		} else if fl, ok := f.(mcnflag.BoolFlag); ok {
+			fl.Name = "external" + fl.Name
+			fl.EnvVar = "EXTERNAL" + fl.EnvVar
+		} else {
+			panic("unknown flag type")
 		}
 		flags[i] = f
 	}
