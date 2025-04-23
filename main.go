@@ -8,6 +8,9 @@ import (
 	"github.com/rancher/machine/drivers/vmwarevsphere"
 	"github.com/rancher/machine/libmachine/drivers"
 	"github.com/rancher/machine/libmachine/drivers/plugin"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 type driverFunc = func(string, string) drivers.Driver
@@ -33,12 +36,13 @@ func (d *driverWrapper) DriverName() string {
 	return fmt.Sprintf("external-%s", d.Driver.DriverName())
 }
 
-var name = ""
-
 func main() {
-	if name == "" {
-		panic("no driver name provided.")
+	basename, err := os.Executable()
+	if err != nil {
+
 	}
+	s := strings.Split(filepath.Base(basename), "-")
+	name := s[len(s)-1]
 	if driver, ok := driverMap[name]; ok {
 		plugin.RegisterDriver(&driverWrapper{driver("machine", "")})
 	} else {
