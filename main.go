@@ -8,6 +8,7 @@ import (
 	"github.com/rancher/machine/drivers/vmwarevsphere"
 	"github.com/rancher/machine/libmachine/drivers"
 	"github.com/rancher/machine/libmachine/drivers/plugin"
+	"github.com/rancher/machine/libmachine/mcnflag"
 	"os"
 	"path/filepath"
 	"strings"
@@ -36,10 +37,56 @@ func (d *driverWrapper) DriverName() string {
 	return fmt.Sprintf("external%s", d.Driver.DriverName())
 }
 
+type driverOptions struct {
+	drivers.DriverOptions
+}
+
+func (d *driverOptions) String(key string) string {
+	return d.DriverOptions.String("external" + key)
+}
+
+func (d *driverOptions) StringSlice(key string) []string {
+	return d.DriverOptions.StringSlice("external" + key)
+}
+
+func (d *driverOptions) Int(key string) int {
+	return d.DriverOptions.Int("external" + key)
+}
+
+func (d *driverOptions) Bool(key string) bool {
+	return d.DriverOptions.Bool("external" + key)
+}
+
+func (d *driverWrapper) SetConfigFromFlags(opts drivers.DriverOptions) error {
+	return d.Driver.SetConfigFromFlags(&driverOptions{opts})
+}
+
+func (d *driverWrapper) GetCreateFlags() []mcnflag.Flag {
+	flags := d.Driver.GetCreateFlags()
+	for i, f := range flags {
+		switch f.(type) {
+		case *mcnflag.StringFlag:
+			f.(*mcnflag.StringFlag).Name = "external" + f.(*mcnflag.StringFlag).Name
+			f.(*mcnflag.StringFlag).EnvVar = "EXTERNAL" + f.(*mcnflag.StringFlag).EnvVar
+		case *mcnflag.StringSliceFlag:
+			f.(*mcnflag.StringSliceFlag).Name = "external" + f.(*mcnflag.StringSliceFlag).Name
+			f.(*mcnflag.StringSliceFlag).EnvVar = "EXTERNAL" + f.(*mcnflag.StringSliceFlag).EnvVar
+		case *mcnflag.IntFlag:
+			f.(*mcnflag.IntFlag).Name = "external" + f.(*mcnflag.IntFlag).Name
+			f.(*mcnflag.IntFlag).EnvVar = "EXTERNAL" + f.(*mcnflag.IntFlag).EnvVar
+		case *mcnflag.BoolFlag:
+			f.(*mcnflag.BoolFlag).Name = "external" + f.(*mcnflag.BoolFlag).Name
+			f.(*mcnflag.BoolFlag).EnvVar = "EXTERNAL" + f.(*mcnflag.BoolFlag).EnvVar
+		}
+		flags[i] = f
+	}
+	return flags
+}
+
 func main() {
 	basename, err := os.Executable()
 	if err != nil {
-
+		panic(err)
 	}
 	s := strings.Split(filepath.Base(basename), "-")
 	name := s[len(s)-1]
