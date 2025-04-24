@@ -40,6 +40,7 @@ func (d *driverWrapper) DriverName() string {
 }
 
 func (d *driverWrapper) PreCreateCheck() error {
+	log.Infof("os.Args: %v", os.Args)
 	p := d.Driver.GetSSHKeyPath()
 	log.Infof("Creating ssh key path: %s", p)
 	if err := os.MkdirAll(filepath.Dir(p), 0777); err != nil {
