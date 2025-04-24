@@ -8,6 +8,7 @@ import (
 	"github.com/rancher/machine/drivers/vmwarevsphere"
 	"github.com/rancher/machine/libmachine/drivers"
 	"github.com/rancher/machine/libmachine/drivers/plugin"
+	"github.com/rancher/machine/libmachine/log"
 	"github.com/rancher/machine/libmachine/mcnflag"
 	"os"
 	"path/filepath"
@@ -113,7 +114,9 @@ func main() {
 	s := strings.Split(filepath.Base(basename), "-")
 	name := s[len(s)-1]
 	if driver, ok := driverMap[strings.TrimPrefix(name, "external")]; ok {
-		plugin.RegisterDriver(&driverWrapper{driver("machine", "")})
+		d := &driverWrapper{driver("machine", "")}
+		log.Infof("SSH Key Path: %s", d.GetSSHKeyPath()) // debug
+		plugin.RegisterDriver(d)
 	} else {
 		panic("no driver found for " + name + ".")
 	}
