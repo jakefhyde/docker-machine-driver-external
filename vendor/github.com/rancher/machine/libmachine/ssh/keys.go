@@ -12,6 +12,7 @@ import (
 	"io"
 	"os"
 	"runtime"
+	"runtime/debug"
 
 	gossh "golang.org/x/crypto/ssh"
 
@@ -76,11 +77,13 @@ func (kp *KeyPair) WriteToFile(privateKeyPath string, publicKeyPath string) erro
 		f, err := os.Create(v.File)
 		if err != nil {
 			log.Infof("Error creating file: %s", err)
+			os.Stdout.Write(debug.Stack())
 			return ErrUnableToWriteFile
 		}
 
 		if _, err := f.Write(v.Value); err != nil {
 			log.Infof("Error writing to file: %s", err)
+			os.Stdout.Write(debug.Stack())
 			return ErrUnableToWriteFile
 		}
 
