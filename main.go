@@ -14,16 +14,16 @@ import (
 	"strings"
 )
 
-type Driver interface {
+type driverWrapper struct {
 	drivers.Driver
 }
 
-type genFunc = func(string, string) Driver
+type genFunc = func(string, string) *driverWrapper
 
-func genWrapper[T Driver](f func(string, string) T) genFunc {
-	return func(a1 string, a2 string) Driver {
+func genWrapper[T drivers.Driver](f func(string, string) T) genFunc {
+	return func(a1 string, a2 string) *driverWrapper {
 		d := f(a1, a2)
-		return d
+		return &driverWrapper{d}
 	}
 }
 
@@ -34,12 +34,16 @@ var driverMap = map[string]genFunc{
 	"vmwarevsphere": genWrapper(vmwarevsphere.NewDriver),
 }
 
-type driverWrapper struct {
-	drivers.Driver
-}
-
 func (d *driverWrapper) DriverName() string {
 	return fmt.Sprintf("external%s", d.Driver.DriverName())
+}
+
+func (d *driverWrapper) GetSSHKeyPath() string {
+	p := d.Driver.GetSSHKeyPath()
+	if err := os.MkdirAll(filepath.Dir(p), 0750); err != nil {
+		panic(fmt.Errorf("cannot create the folder to store the SSH private key. %s", err))
+	}
+	return p
 }
 
 type driverOptions struct {
@@ -119,12 +123,6 @@ func main() {
 	name := s[len(s)-1]
 	if driver, ok := driverMap[strings.TrimPrefix(name, "external")]; ok {
 		d := driver("", "")
-		//if err := os.MkdirAll("machines", 0750); err != nil {
-		//	panic(fmt.Errorf("cannot create the folder to store existing data. %s", err))
-		//}
-		if err := os.MkdirAll(filepath.Dir(d.GetSSHKeyPath()), 0750); err != nil {
-			panic(fmt.Errorf("cannot create the folder to store the SSH private key. %s", err))
-		}
 		plugin.RegisterDriver(d)
 	} else {
 		panic("no driver found for " + name + ".")
