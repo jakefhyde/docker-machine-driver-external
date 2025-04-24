@@ -14,6 +14,8 @@ import (
 	"runtime"
 
 	gossh "golang.org/x/crypto/ssh"
+	
+	"github.com/rancher/machine/libmachine/log"
 )
 
 var (
@@ -77,6 +79,7 @@ func (kp *KeyPair) WriteToFile(privateKeyPath string, publicKeyPath string) erro
 		}
 
 		if _, err := f.Write(v.Value); err != nil {
+			log.Error("Error writing to file: %s", err)
 			return ErrUnableToWriteFile
 		}
 
