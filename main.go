@@ -16,9 +16,10 @@ import (
 	"strings"
 )
 
+// TODO: get marshal/unmarshal working for
 type driverWrapper struct {
 	drivers.Driver
-	base func(d any) *drivers.BaseDriver
+	base func(d any) any
 }
 
 func (d driverWrapper) MarshalJSON() ([]byte, error) {
@@ -36,7 +37,7 @@ func (d *driverWrapper) UnmarshalJSON(data []byte) error {
 
 type genFunc = func(string, string) *driverWrapper
 
-func genWrapper[T drivers.Driver](f func(string, string) T, f2 func(d any) *drivers.BaseDriver) genFunc {
+func genWrapper[T drivers.Driver](f func(string, string) T, f2 func(d any) any) genFunc {
 	return func(a1 string, a2 string) *driverWrapper {
 		d := f(a1, a2)
 		return &driverWrapper{d, f2}
@@ -44,17 +45,17 @@ func genWrapper[T drivers.Driver](f func(string, string) T, f2 func(d any) *driv
 }
 
 var driverMap = map[string]genFunc{
-	"amazonec2": genWrapper(amazonec2.NewDriver, func(d any) *drivers.BaseDriver {
-		return d.(*amazonec2.Driver).BaseDriver
+	"amazonec2": genWrapper(amazonec2.NewDriver, func(d any) any {
+		return d.(*amazonec2.Driver)
 	}),
-	"azure": genWrapper(azure.NewDriver, func(d any) *drivers.BaseDriver {
-		return d.(azure.Driver).BaseDriver
+	"azure": genWrapper(azure.NewDriver, func(d any) any {
+		return d.(azure.Driver)
 	}),
-	"digitalocean": genWrapper(digitalocean.NewDriver, func(d any) *drivers.BaseDriver {
-		return d.(*digitalocean.Driver).BaseDriver
+	"digitalocean": genWrapper(digitalocean.NewDriver, func(d any) any {
+		return d.(*digitalocean.Driver)
 	}),
-	"vmwarevsphere": genWrapper(vmwarevsphere.NewDriver, func(d any) *drivers.BaseDriver {
-		return d.(vmwarevsphere.Driver).BaseDriver
+	"vmwarevsphere": genWrapper(vmwarevsphere.NewDriver, func(d any) any {
+		return d.(vmwarevsphere.Driver)
 	}),
 }
 
