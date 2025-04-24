@@ -39,13 +39,13 @@ func (d *driverWrapper) DriverName() string {
 	return fmt.Sprintf("external%s", d.Driver.DriverName())
 }
 
-func (d *driverWrapper) GetSSHKeyPath() string {
+func (d *driverWrapper) PreCreateCheck() error {
 	p := d.Driver.GetSSHKeyPath()
 	log.Infof("Creating ssh key path: %s", p)
 	if err := os.MkdirAll(filepath.Dir(p), 0777); err != nil {
-		panic(fmt.Errorf("cannot create the folder to store the SSH private key. %s", err))
+		return fmt.Errorf("cannot create the folder to store the SSH private key. %s", err)
 	}
-	return p
+	return d.Driver.PreCreateCheck()
 }
 
 type driverOptions struct {
