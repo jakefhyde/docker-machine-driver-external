@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/rancher/machine/drivers/amazonec2"
 	"github.com/rancher/machine/drivers/azure"
@@ -17,22 +18,44 @@ import (
 
 type driverWrapper struct {
 	drivers.Driver
+	base func(d any) *drivers.BaseDriver
+}
+
+func (d driverWrapper) MarshalJSON() ([]byte, error) {
+	base := d.base(d.Driver)
+	return json.Marshal(base)
+}
+
+func (d *driverWrapper) UnmarshalJSON(data []byte) error {
+	base := d.base(d.Driver)
+	if err := json.Unmarshal(data, base); err != nil {
+		return err
+	}
+	return nil
 }
 
 type genFunc = func(string, string) *driverWrapper
 
-func genWrapper[T drivers.Driver](f func(string, string) T) genFunc {
+func genWrapper[T drivers.Driver](f func(string, string) T, f2 func(d any) *drivers.BaseDriver) genFunc {
 	return func(a1 string, a2 string) *driverWrapper {
 		d := f(a1, a2)
-		return &driverWrapper{d}
+		return &driverWrapper{d, f2}
 	}
 }
 
 var driverMap = map[string]genFunc{
-	"amazonec2":     genWrapper(amazonec2.NewDriver),
-	"azure":         genWrapper(azure.NewDriver),
-	"digitalocean":  genWrapper(digitalocean.NewDriver),
-	"vmwarevsphere": genWrapper(vmwarevsphere.NewDriver),
+	"amazonec2": genWrapper(amazonec2.NewDriver, func(d any) *drivers.BaseDriver {
+		return d.(*amazonec2.Driver).BaseDriver
+	}),
+	"azure": genWrapper(azure.NewDriver, func(d any) *drivers.BaseDriver {
+		return d.(azure.Driver).BaseDriver
+	}),
+	"digitalocean": genWrapper(digitalocean.NewDriver, func(d any) *drivers.BaseDriver {
+		return d.(*digitalocean.Driver).BaseDriver
+	}),
+	"vmwarevsphere": genWrapper(vmwarevsphere.NewDriver, func(d any) *drivers.BaseDriver {
+		return d.(vmwarevsphere.Driver).BaseDriver
+	}),
 }
 
 func (d *driverWrapper) DriverName() string {
