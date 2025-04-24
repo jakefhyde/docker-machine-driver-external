@@ -14,7 +14,7 @@ import (
 	"runtime"
 
 	gossh "golang.org/x/crypto/ssh"
-	
+
 	"github.com/rancher/machine/libmachine/log"
 )
 
@@ -75,6 +75,7 @@ func (kp *KeyPair) WriteToFile(privateKeyPath string, publicKeyPath string) erro
 	for _, v := range files {
 		f, err := os.Create(v.File)
 		if err != nil {
+			log.Error("Error creating file: %s", err)
 			return ErrUnableToWriteFile
 		}
 
