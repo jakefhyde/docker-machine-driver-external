@@ -8,6 +8,7 @@ import (
 	"github.com/rancher/machine/drivers/vmwarevsphere"
 	"github.com/rancher/machine/libmachine/drivers"
 	"github.com/rancher/machine/libmachine/drivers/plugin"
+	"github.com/rancher/machine/libmachine/log"
 	"github.com/rancher/machine/libmachine/mcnflag"
 	"os"
 	"path/filepath"
@@ -40,6 +41,7 @@ func (d *driverWrapper) DriverName() string {
 
 func (d *driverWrapper) GetSSHKeyPath() string {
 	p := d.Driver.GetSSHKeyPath()
+	log.Infof("Creating ssh key path: %s", p)
 	if err := os.MkdirAll(filepath.Dir(p), 0750); err != nil {
 		panic(fmt.Errorf("cannot create the folder to store the SSH private key. %s", err))
 	}
