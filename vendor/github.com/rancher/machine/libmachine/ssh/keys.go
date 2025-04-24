@@ -75,12 +75,12 @@ func (kp *KeyPair) WriteToFile(privateKeyPath string, publicKeyPath string) erro
 	for _, v := range files {
 		f, err := os.Create(v.File)
 		if err != nil {
-			log.Error("Error creating file: %s", err)
+			log.Infof("Error creating file: %s", err)
 			return ErrUnableToWriteFile
 		}
 
 		if _, err := f.Write(v.Value); err != nil {
-			log.Error("Error writing to file: %s", err)
+			log.Infof("Error writing to file: %s", err)
 			return ErrUnableToWriteFile
 		}
 
