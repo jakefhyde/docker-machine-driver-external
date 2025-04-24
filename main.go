@@ -42,7 +42,7 @@ func (d *driverWrapper) DriverName() string {
 func (d *driverWrapper) GetSSHKeyPath() string {
 	p := d.Driver.GetSSHKeyPath()
 	log.Infof("Creating ssh key path: %s", p)
-	if err := os.MkdirAll(filepath.Dir(p), 0750); err != nil {
+	if err := os.MkdirAll(filepath.Dir(p), 0777); err != nil {
 		panic(fmt.Errorf("cannot create the folder to store the SSH private key. %s", err))
 	}
 	return p
